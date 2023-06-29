@@ -1,6 +1,6 @@
 version: '3'
 services:
-  my_images:
+  my_image:
     image: perumal007/react
     ports:
       - 80:80
