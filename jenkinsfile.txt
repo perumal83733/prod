@@ -30,14 +30,14 @@ pipeline {
                     }
 
                     // Build and tag the Docker image
-                    sh "docker build -t perumal007/react-apps ."
+                    sh "./build.sh"
 
                     // Push the Docker image
                     if (env.BRANCH_NAME == 'master') {
-                        sh "docker tag perumal007/react-apps:latest perumal007/prod:latest"
+                        sh "docker tag perumal007/react :latest perumal007/prod:latest"
                         sh "docker push perumal007/prod:latest"
                     } else if (env.BRANCH_NAME == 'dev') {
-                        sh "docker tag perumal007/react-apps:latest perumal007/dev:latest"
+                        sh "docker tag perumal007/react:latest perumal007/dev:latest"
                         sh "docker push perumal007/dev:latest"
                     } else {
                         echo "pipeline is broken"
