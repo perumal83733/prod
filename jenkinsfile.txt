@@ -59,7 +59,7 @@ pipeline {
             // Send success notification via email
             emailext(
                 subject: 'Build Success',
-                body: 'The build was successful. You can find the output at the following location: your-output-location',
+                body: 'The build was successful. You can find the output at the following location: var/lib/jenkins/workspace/target',
                 to: 'perumalraja8373@gmail.com',
                 attachLog: true
             )
