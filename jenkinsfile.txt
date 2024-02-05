@@ -9,7 +9,7 @@ pipeline {
         stage('Pull Code') {
             steps {
                 // Pull code from both 'prod' and 'dev' branches
-                checkout([$class: 'GitSCM', branches: [[name: 'prod'], [name: 'dev']], userRemoteConfigs: [[url: 'https://github.com/perumal83733/Guvi-Tasks.git']]])
+                checkout([$class: 'GitSCM', branches: [[name: 'master'], [name: 'dev']], userRemoteConfigs: [[url: 'https://github.com/perumal83733/Guvi-Tasks.git']]])
             }
         }
 
@@ -33,7 +33,7 @@ pipeline {
                     sh "docker build -t perumal007/react-apps ."
 
                     // Push the Docker image
-                    if (env.BRANCH_NAME == 'prod') {
+                    if (env.BRANCH_NAME == 'master') {
                         sh "docker tag perumal007/react-apps:latest perumal007/prod:latest"
                         sh "docker push perumal007/prod:latest"
                     } else if (env.BRANCH_NAME == 'dev') {
