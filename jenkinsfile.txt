@@ -1,0 +1,78 @@
+pipeline {
+    agent any
+
+    environment {
+        DOCKERHUB_CREDENTIALS = credentials('dockerhub-cred-perumal')
+    }
+
+    stages {
+        stage('Pull Code') {
+            steps {
+                // Pull code from both 'prod' and 'dev' branches
+                checkout([$class: 'GitSCM', branches: [[name: 'prod'], [name: 'dev']], userRemoteConfigs: [[url: 'https://github.com/perumal83733/Guvi-Tasks.git']]])
+            }
+        }
+
+        stage('Grant Permissions') {
+            steps {
+                // Grant executable permissions to a file
+                sh 'chmod +x build.sh'
+                sh 'chmod +x deploy.sh'
+            }
+        }
+
+        stage('Build and Push Docker Image') {
+            steps {
+                script {
+                    // Docker login
+                    withCredentials([usernamePassword(credentialsId: 'dockerhub-cred-perumal', usernameVariable: 'DOCKERHUB_CREDENTIALS_USR', passwordVariable: 'DOCKERHUB_CREDENTIALS_PSW')]) {
+                        sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
+                    }
+
+                    // Build and tag the Docker image
+                    sh "docker build -t perumal007/react-apps ."
+
+                    // Push the Docker image
+                    if (env.BRANCH_NAME == 'prod') {
+                        sh "docker tag perumal007/react-apps:latest perumal007/prod:latest"
+                        sh "docker push perumal007/prod:latest"
+                    } else if (env.BRANCH_NAME == 'dev') {
+                        sh "docker tag perumal007/react-apps:latest perumal007/dev:latest"
+                        sh "docker push perumal007/dev:latest"
+                    } else {
+                        echo "pipeline is broken"
+                    }
+                }
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                // Run your deployment script
+                sh './deploy.sh'
+            }
+        }
+    }
+
+    post {
+        success {
+            // Send success notification via email
+            emailext(
+                subject: 'Build Success',
+                body: 'The build was successful. You can find the output at the following location: your-output-location',
+                to: 'perumalraja8373@gmail.com',
+                attachLog: true
+            )
+        }
+
+        failure {
+            // Send failure notification via email
+            emailext(
+                subject: 'Build Failure',
+                body: 'The build failed. Please check the Jenkins logs for more information.',
+                to: 'perumalraja8373@gmail.com',
+                attachLog: true
+            )
+        }
+    }
+}
